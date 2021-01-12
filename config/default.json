@@ -1,3 +1,4 @@
 {
-    "mongoURI": "mongodb+srv://Luka123:l19974870@cluster0.hxnfv.mongodb.net/<dbname>?retryWrites=true&w=majority"
+    "mongoURI": "mongodb+srv://Luka123:l19974870@cluster0.hxnfv.mongodb.net/<dbname>?retryWrites=true&w=majority",
+    "jwtSecret": "secret"
 }
