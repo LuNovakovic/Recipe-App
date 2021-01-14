@@ -1,98 +1,151 @@
 import React, { useReducer } from "react";
-import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 import RecipeContext from "./recipeContext";
 import recipeReducer from "./recipeReducer";
 import {
+  GET_RECIPES,
   ADD_RECIPE,
   DELETE_RECIPE,
   SET_CURRENT,
   CLEAR_CURRENT,
   UPDATE_RECIPE,
   FILTER_RECIPES,
+  CLEAR_RECIPES,
   CLEAR_FILTER,
+  RECIPE_ERROR,
 } from "../types";
-import recipeContext from "./recipeContext";
 
 const RecipeState = (props) => {
   const initialState = {
-    recipes: [
-      {
-        id: 1,
-        name: "Deep-fried Deviled Eggs Recipe by Tasty",
-        numberofservings: "2",
-        cookingtime: "5 min",
-        ingredients:
-          "Refrigerated 12 Eggs, hard 3 Eggs, Condiments, 1 tsp Hot sauce, 4 tbsp Mayonnaise, Baking & Spices, 1 cup Flour, 1 Paprika, 1 Pepper, 1 Salt",
-        preparationsteps: "Cook eggs beforehand, later use topings you desire",
-      },
-      {
-        id: 2,
-        name: "Deep-fried Deviled Eggs Recipe by Tasty",
-        numberofservings: "2",
-        cookingtime: "5 min",
-        ingredients:
-          "Refrigerated 12 Eggs, hard 3 Eggs, Condiments, 1 tsp Hot sauce, 4 tbsp Mayonnaise, Baking & Spices, 1 cup Flour, 1 Paprika, 1 Pepper, 1 Salt",
-        preparationsteps: "Cook eggs beforehand, later use topings you desire",
-      },
-      {
-        id: 3,
-        name: "Deep-fried Deviled Eggs Recipe by Tasty",
-        numberofservings: "2",
-        cookingtime: "5 min",
-        ingredients:
-          "Refrigerated 12 Eggs, hard 3 Eggs, Condiments, 1 tsp Hot sauce, 4 tbsp Mayonnaise, Baking & Spices, 1 cup Flour, 1 Paprika, 1 Pepper, 1 Salt",
-        preparationsteps: "Cook eggs beforehand, later use topings you desire",
-      },
-    ],
+    recipes: null,
     current: null,
+    filtered: null,
+    error: null,
   };
 
   const [state, dispatch] = useReducer(recipeReducer, initialState);
 
-  // Add Recipe
-  const addRecipe = (recipe) => {
-    recipe.id = uuidv4(); //here
-    dispatch({
-      type: ADD_RECIPE,
-      payload: recipe,
-    });
+  // Get Recipes
+  const getRecipes = async () => {
+    try {
+      const res = await axios.get("/api/recipes");
+
+      dispatch({
+        type: GET_RECIPES,
+        payload: res.data,
+      });
+    } catch (err) {
+      dispatch({
+        type: RECIPE_ERROR,
+        payload: err.response.msg,
+      });
+    }
   };
 
-  // Delete Recipe
-  const deleteRecipe = (id) => {
-    dispatch({
-      type: DELETE_RECIPE,
-      payload: id,
-    });
+  // Add Recipe
+  const addRecipe = async (recipe) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      const res = await axios.post("/api/recipes", recipe, config);
+
+      dispatch({
+        type: ADD_RECIPE,
+        payload: res.data,
+      });
+    } catch (err) {
+      dispatch({
+        type: RECIPE_ERROR,
+        payload: err.response.msg,
+      });
+    }
+  };
+
+  // Delete recipe
+  const deleteRecipe = async (id) => {
+    try {
+      await axios.delete(`/api/recipes/${id}`);
+
+      dispatch({
+        type: DELETE_RECIPE,
+        payload: id,
+      });
+    } catch (err) {
+      dispatch({
+        type: RECIPE_ERROR,
+        payload: err.response.msg,
+      });
+    }
+  };
+
+  // Update Recipe
+  const updateRecipe = async (recipe) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      const res = await axios.put(`/api/recipes/${recipe._id}`, recipe, config);
+
+      dispatch({
+        type: UPDATE_RECIPE,
+        payload: res.data,
+      });
+    } catch (err) {
+      dispatch({
+        type: RECIPE_ERROR,
+        payload: err.response.msg,
+      });
+    }
+  };
+
+  // Clear recipes
+  const clearRecipes = () => {
+    dispatch({ type: CLEAR_RECIPES });
   };
 
   // Set Current Recipe
   const setCurrent = (recipe) => {
-    dispatch({
-      type: SET_CURRENT,
-      payload: recipe,
-    });
+    dispatch({ type: SET_CURRENT, payload: recipe });
   };
 
   // Clear Current Recipe
   const clearCurrent = () => {
-    dispatch({
-      type: CLEAR_CURRENT,
-    });
+    dispatch({ type: CLEAR_CURRENT });
   };
 
-  // Update Recipe
-
-  // Filter Recipes
+  // Filter Contacts
+  const filterRecipes = (text) => {
+    dispatch({ type: FILTER_RECIPES, payload: text });
+  };
 
   // Clear Filter
+  const clearFilter = () => {
+    dispatch({ type: CLEAR_FILTER });
+  };
 
   return (
     <RecipeContext.Provider
       value={{
         recipes: state.recipes,
+        current: state.current,
+        filtered: state.filtered,
+        error: state.error,
         addRecipe,
         deleteRecipe,
+        setCurrent,
+        clearCurrent,
+        updateRecipe,
+        filterRecipes,
+        clearFilter,
+        getRecipes,
+        clearRecipes,
       }}
     >
       {props.children}

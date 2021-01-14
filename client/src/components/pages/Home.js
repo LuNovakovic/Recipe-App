@@ -1,6 +1,7 @@
 import React from "react";
 import Recipes from "../recipes/Recipes";
 import RecipeForm from "../recipes/RecipeForm";
+import RecipeFilter from "../../";
 
 const Home = () => {
   return (
